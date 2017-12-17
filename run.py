@@ -36,6 +36,7 @@ if __name__ == "__main__":
     Model = LSTMAutoEncoder(vocab_size, FLAGS.hidden_dim, FLAGS.embedding_dim, FLAGS.learning_rate)
     print("model created")
     global_step = tf.Variable(0, name="global_step", trainable=False)
+    increment_global_step_op = tf.assign(global_step, global_step+1)
     loss_summary = tf.summary.scalar("loss", Model.loss)
     summary_dir = os.path.join(FLAGS.out_dir, "summaries")
     summary_writer = tf.summary.FileWriter(summary_dir, sess.graph)
@@ -54,7 +55,7 @@ if __name__ == "__main__":
         Model.encoder_inputs_length: X_batch_length,        
       }
 
-      _, loss, step, summary = sess.run([Model.train_op, Model.loss, global_step, loss_summary]
+      _, loss, step, summary = sess.run([Model.train_op, Model.loss,  increment_global_step_op, loss_summary]
                                              , feed_dict=feed_dict)
       time_str = datetime.datetime.now().isoformat()
       print("{}: step {}, loss {:g}".format(time_str, step, loss))
