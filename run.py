@@ -60,6 +60,18 @@ if __name__ == "__main__":
       time_str = datetime.datetime.now().isoformat()
       print("{}: step {}, loss {:g}".format(time_str, step, loss))
       summary_writer.add_summary(summary, step)
+    
+
+      def encode_transform_step(session, Model, X, X_length):
+        feed_dict={
+          Model.encoder_inputs : X,
+          Model.encoder_inputs_length: X_length,        
+        }
+        final = sess.run([Model.encoder_final_state], feed_dict=feed_dict)
+        #return np.concatenate((final[0],final[1]),1)
+        #print(len(final))
+        #return final
+        return np.concatenate((final[0].c, final[0].h), 1)
       
     for _ in range(FLAGS.n_epochs):
       for X_batch, X_batch_length in utils.batch_iter(sentence_encode, FLAGS.batch_size):

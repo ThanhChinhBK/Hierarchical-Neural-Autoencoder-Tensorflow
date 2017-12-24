@@ -18,7 +18,8 @@ class LSTMAutoEncoder():
     
   def _get_embedding(self):
     with tf.variable_scope("embedding"):
-      self.embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.input_embedding_size], -1.0, 1.0), dtype=tf.float32)
+      self.embeddings = tf.Variable(tf.random_uniform([self.vocab_size, self.input_embedding_size], -1.0, 1.0), 
+                                    dtype=tf.float32)
       self.encoder_inputs_embedded = tf.nn.embedding_lookup(self.embeddings, self.encoder_inputs)
     
   def _encoder(self):
@@ -109,8 +110,9 @@ class LSTMAutoEncoder():
   def _build_graph(self):
     self._create_placeholder()
     self._get_embedding()
-    _, encoder_final_state = self._encoder()
-    self.decoder_logits, self.decoder_prediction = self._decoder(encoder_final_state)
+    _, self.encoder_final_state = self._encoder()
+    #self.code = tf.concat([encoder_final_state.h. encoder_final_state.c])
+    self.decoder_logits, self.decoder_prediction = self._decoder(self.encoder_final_state)
     self.loss, self.train_op = self._add_optimize()
 
     
