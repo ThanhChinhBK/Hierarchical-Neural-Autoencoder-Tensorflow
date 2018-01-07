@@ -11,7 +11,7 @@ tf.flags.DEFINE_integer("n_epochs", 100, "num epochs")
 tf.flags.DEFINE_float("learning_rate", 0.001, "learning rate")
 tf.flags.DEFINE_integer("embedding_dim", 300, "word embedding dimession")
 tf.flags.DEFINE_integer("hidden_dim", 300, "hidden dim of network")
-tf.flags.DEFINE_string("data_path", "data/data.txt", "data path")
+tf.flags.DEFINE_string("data_path", "data", "data path")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 tf.flags.DEFINE_string("out_dir", "runs/", "path to save checkpoint")
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     sess.run(tf.global_variables_initializer())
 
-    def train_step(session,Model, X_batch, X_batch_length):
+    def train_step(session,Model, X_batch, X_batch_length, epoch):
       
       feed_dict={
         Model.encoder_inputs : X_batch,
@@ -58,7 +58,7 @@ if __name__ == "__main__":
       _, loss, step, summary = sess.run([Model.train_op, Model.loss,  increment_global_step_op, loss_summary]
                                              , feed_dict=feed_dict)
       time_str = datetime.datetime.now().isoformat()
-      print("{}: step {}, loss {:g}".format(time_str, step, loss))
+      print("{}: epoch:{} step {}, loss {:g}".format(time_str, epoch, step, loss))
       summary_writer.add_summary(summary, step)
     
 
@@ -73,9 +73,9 @@ if __name__ == "__main__":
         #return final
         return np.concatenate((final[0].c, final[0].h), 1)
       
-    for _ in range(FLAGS.n_epochs):
+    for e in range(FLAGS.n_epochs):
       for X_batch, X_batch_length in utils.batch_iter(sentence_encode, FLAGS.batch_size):
-        train_step(sess, Model, X_batch, X_batch_length)
-      save_path = saver.save(sess)
+        train_step(sess, Model, X_batch, X_batch_length, e)
+      save_path = saver.save(sess, os.path.join(checkpoint_dir, "checkpoint"), epoch)
       print("Model saved in file: %s" % save_path)  
       

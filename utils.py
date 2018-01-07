@@ -1,25 +1,30 @@
 import numpy as np
+import os
+from nltk.tokenize import word_tokenize
 
 def read_data(data_path):
-  vocab = ["<EOS>", "<PAD>"]
-  sentences = []
-  sentence_encode = []
-  with open(data_path) as f:
-    for line in f:
-      if len(line) < 1: continue
-      temp_sentence = []
-      temp_encode_sentence = []
-      for word in line.strip().split():
+  vocab = ["<EOT>", "<PAD>"] # EOT = end of text
+  texts = []
+  text_encode = []
+  
+  for file in os.listdir(data_path):
+    with open(os.path.join(data_path, file)) as f:
+      lines = f.readlines()
+      lines = " ".join(lines[1:]) # line 1 for title of text
+      if len(lines) < 1: continue
+      temp_text = []
+      temp_encode_text = []
+      for word in word_tokenize(lines.strip()):
         if word not in vocab:
           vocab.append(word)
-        temp_sentence.append(word)
-        temp_encode_sentence.append(vocab.index(word))
-      temp_encode_sentence.append(0)
-      temp_sentence.append("<EOS>")
+        temp_text.append(word)
+        temp_encode_text.append(vocab.index(word))
+      temp_encode_text.append(0)
+      temp_text.append("<EOT>")
       
-      sentences.append(temp_sentence)
-      sentence_encode.append(temp_encode_sentence)
-  return vocab, sentence_encode, sentences
+      texts.append(temp_text)
+      text_encode.append(temp_encode_text)
+  return vocab, text_encode, texts
 
 def batch(inputs, max_sequence_length=None):
   """
